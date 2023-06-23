@@ -15,9 +15,9 @@
 	<name>language-tester</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
-    <java.version>1.8.</java.version>
-    <maven.compiler.target>17</maven.compiler.target>
-    <maven.compiler.source>17</maven.compiler.source>
+    <java.version>11</java.version>
+    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
 </properties>
 	<dependencies>
 		<dependency>
@@ -100,8 +100,8 @@
     <artifactId>maven-resources-plugin</artifactId>
  
         <configuration>
-            <source>1.8.</source>
-            <target>1.8.</target>
+            <source>11</source>
+            <target>11</target>
         </configuration>
     <executions>
         <execution>
