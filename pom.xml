@@ -96,6 +96,10 @@
 			
 			<plugin>
     <artifactId>maven-resources-plugin</artifactId>
+     <configuration>
+            <source>1.17</source>
+            <target>1.17</target>
+        </configuration>
     <executions>
         <execution>
             <id>copy-resources</id>
