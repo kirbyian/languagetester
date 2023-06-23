@@ -1,0 +1,30 @@
+.conjugation-form-label {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #000000;
+    margin-bottom: 0.5rem;
+}
+
+.conjugation-form-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+}
+
+.incorrect-answer {
+    background-color: #f4b1b1;
+    margin: 5px 5px 5px 5px;
+    margin-left: 30px;
+    size: 1.0rem;
+  }
+
+  .incorrect-answer:hover {
+    background-color: #f4b1b1;
+  }
+
+  .correct-answer {
+    background-color: #b1f4b1;
+    size: 1.0rem;
+  }

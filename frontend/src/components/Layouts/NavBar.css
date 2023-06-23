@@ -1,0 +1,22 @@
+.sign-in-btn {
+    font-size: 15x;
+    background-color: #007bff;
+    border-color: #007bff;
+  }
+  
+  .nav-link-custom {
+    color: white;
+  }
+
+    .nav-link-custom:hover {
+        color: #0056b3;
+    }
+
+    .nav-link-custom:active {
+        color: #0056b3;
+    }
+
+  .nav-toggle {
+    background-color: #007bff;
+    border-color: #007bff;
+  }

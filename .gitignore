@@ -24,3 +24,65 @@ hs_err_pid*
 /.metadata/
 /.classpath
 /.DS_Store
+# Spring Boot
+target/
+*.jar
+*.war
+*.ear
+*.class
+*.log
+*.dat
+*.tmp
+*.out
+*.pid
+
+# Maven
+mvnw
+mvnw.cmd
+.mvn/
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+
+# Gradle
+.gradle/
+/build/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~
+
+# React
+node_modules/
+build/
+.env
+
+# Miscellaneous
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Package Files #
+*.war
+*.ear
+*.jar
+*.factorypath

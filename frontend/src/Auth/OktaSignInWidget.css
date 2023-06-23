@@ -1,0 +1,36 @@
+
+.sign-in-page h2{
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.sign-in-page label{
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.sign-in-page{
+    background-color: #002a3b;
+    border-color: #002a3b;
+    color:white;
+    max-width: 800px;
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+
+}
+
+#okta-signin-submit{
+    background-color: #007bff;
+    border-color: #007bff;
+    padding: 7px 25px;
+    font-size: 20px;
+    font-weight: 100%;
+    color: white;
+  
+}
+#okta-signin-submit:hover{
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
