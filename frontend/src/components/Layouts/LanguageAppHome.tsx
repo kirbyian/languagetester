@@ -2,7 +2,6 @@ import React from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import backgroundImg from "../../assets/images/language-portuguese.jpeg";
-import { Jumbotron } from "reactstrap";
 
 export const LanguageAppHome = () => {
   return (
