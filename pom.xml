@@ -98,11 +98,6 @@
 			
 			<plugin>
     <artifactId>maven-resources-plugin</artifactId>
- 
-        <configuration>
-            <source>17</source>
-            <target>17</target>
-        </configuration>
     <executions>
         <execution>
             <id>copy-resources</id>
@@ -114,7 +109,7 @@
                 <outputDirectory>${project.build.directory}/classes/resources</outputDirectory>
                 <resources>
                     <resource>
-                        <directory>/frontend/build</directory>
+                        <directory>frontend/build</directory>
                     </resource>
                 </resources>
             </configuration>
