@@ -20,7 +20,7 @@ public class SecurityConfig {
 
 		// Protect endpoints /api/,type>/secure
 		httpSecurity
-				.authorizeRequests(configurer -> configurer.antMatchers("api/todos/**").authenticated())
+				.authorizeRequests(configurer -> configurer.antMatchers("api/**").authenticated())
 				.oauth2ResourceServer().jwt();
 
 		httpSecurity.cors();
