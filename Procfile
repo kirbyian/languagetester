@@ -1,1 +1,2 @@
-web: java -jar target/language-tester-0.0.1-SNAPSHOT.jar
+web: java -jar -Dserver.port=${PORT} language-tester-0.0.1-SNAPSHOT.war
+
