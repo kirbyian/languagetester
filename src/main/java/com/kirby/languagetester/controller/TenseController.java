@@ -12,7 +12,7 @@ import com.kirby.languagetester.model.Tense;
 import com.kirby.languagetester.repository.TenseRepository;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("https://languagetester-react-5effb2069628.herokuapp.com")
 @RequestMapping("api/tenses")
 public class TenseController{
 

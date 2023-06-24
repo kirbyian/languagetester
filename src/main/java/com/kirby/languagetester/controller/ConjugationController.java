@@ -29,7 +29,7 @@ import com.kirby.languagetester.utils.ExtractJWT;
 
 @RequestMapping("api/conjugations")
 @RestController()
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("https://languagetester-react-5effb2069628.herokuapp.com")
 public class ConjugationController {
 
 	private ConjugationRepository conjugationRepository;

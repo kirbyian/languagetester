@@ -12,7 +12,7 @@ import com.kirby.languagetester.repository.SubjectRepository;
 
 @RestController
 @RequestMapping("api/subjects")
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("https://languagetester-react-5effb2069628.herokuapp.com")
 public class SubjectController  {
 
 	private SubjectRepository subjectRepository;

@@ -15,7 +15,7 @@ import com.kirby.languagetester.model.Verb;
 import com.kirby.languagetester.repository.VerbRepository;
 
 @RestController
-@CrossOrigin("http://localhost:3000")
+@CrossOrigin("https://languagetester-react-5effb2069628.herokuapp.com")
 @RequestMapping("api/verbs")
 public class VerbController  {
 
