@@ -109,7 +109,7 @@
                 <outputDirectory>${project.build.directory}/classes/resources</outputDirectory>
                <resources>
   			  <resource>
-     		   <directory>frontend/build</directory>
+     		   <directory>/frontend/build</directory>
      		   <targetPath>static</targetPath>
     			</resource>
 				</resources>
@@ -130,8 +130,8 @@
                 <goal>install-node-and-npm</goal>
             </goals>
             <configuration>
-                <nodeVersion>v14.17.0</nodeVersion>
-                <npmVersion>6.14.13</npmVersion>
+                <nodeVersion>v16.17.1</nodeVersion>
+                <npmVersion>8.15.0</npmVersion>
             </configuration>
         </execution>
         <execution>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Col, Container, Input, Row } from "reactstrap";
-import { Button } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 import { set } from "react-hook-form";
 import { redirect, useNavigate } from "react-router-dom";
 import { useOktaAuth } from "@okta/okta-react";
@@ -21,9 +21,9 @@ export const AdminConjugationWizard = () => {
     const verbInputField = useRef<HTMLInputElement>(null);
     const selectedVerbField = useRef<HTMLSelectElement>(null);
     const selectedTenseField = useRef<HTMLSelectElement>(null);
-    const subjectConjugationMap = new Map<Number, String>();
+    const subjectConjugationMap= new Map<Number, String>();
 
-    const base_url = `${process.env.REACT_APP_SPRING_BASE_URL}${process.env.REACT_APP_SPRING_PORT}`;
+
 
     const navigate = useNavigate();
 
@@ -47,7 +47,7 @@ export const AdminConjugationWizard = () => {
             let returnedVerb = new VerbModel(0, "", []);
             if (!isVerbSelected) {
                 const verbExistsResponse = await fetch(
-                    `${base_url}/api/verbs/exists/${verbApiParam}`
+                    `http://localhost:8080/api/verbs/exists/${verbApiParam}`
 
                 );
 
@@ -86,7 +86,7 @@ export const AdminConjugationWizard = () => {
     };
 
     async function getAllTenses(): Promise<TenseModel[]> {
-        const url: string = `${base_url}/api/tenses`;
+        const url: string = `http://localhost:8080/api/tenses`;
 
         const response = await fetch(url);
 
@@ -101,7 +101,7 @@ export const AdminConjugationWizard = () => {
     }
 
     const filterTenses = (verbTenses: TenseModel[], allTenses: TenseModel[]) => {
-        if (verbTenses == null || verbTenses.length === 0) {
+        if (verbTenses==null ||  verbTenses.length === 0) {
             setTenses(allTenses);
             return;
         }
@@ -111,7 +111,7 @@ export const AdminConjugationWizard = () => {
     };
 
     async function createVerb(verb: string): Promise<VerbModel> {
-        const url = `${base_url}/api/verbs/${verb}`;
+        const url = `http://localhost:8080/api/verbs/${verb}`;
 
         const authJson = localStorage.getItem("okta-token-storage");
         const authStateToken = JSON.parse(authJson !== null ? authJson : "");
@@ -126,7 +126,7 @@ export const AdminConjugationWizard = () => {
 
         const createVerbResponse = await fetch(url, requestOptions);
         validateAPIResponse(createVerbResponse);
-        let data = await createVerbResponse.json();
+        let data =await createVerbResponse.json();
         let returnedVerb = new VerbModel(data.id, data.verb, data.tenses);
 
         alert("Verb created successfully!");
@@ -136,7 +136,7 @@ export const AdminConjugationWizard = () => {
 
     const getVerbDetailsByVerbName = async (verb: string): Promise<VerbModel> => {
 
-        const url: string = `${base_url}/api/verbs/${verb}`;
+        const url: string = `http://localhost:8080/api/verbs/${verb}`;
 
         const response = await fetch(url);
 
@@ -145,7 +145,7 @@ export const AdminConjugationWizard = () => {
         const responseJson = await response.json();
 
         const verbTenseDTO = responseJson;
-        verbTenseDTO.verbid = responseJson.id;
+        verbTenseDTO.verbid=responseJson.id;
         setVerbTenseDTO(verbTenseDTO)
         setIsLoading(false);
         return verbTenseDTO;
@@ -154,7 +154,7 @@ export const AdminConjugationWizard = () => {
 
     const getAllSubjects = async (): Promise<[SubjectModel]> => {
 
-        const url: string = `${base_url}/api/subjects`;
+        const url: string = `http://localhost:8080/api/subjects`;
 
         const response = await fetch(url);
 
@@ -179,7 +179,7 @@ export const AdminConjugationWizard = () => {
 
         useEffect(() => {
             const fetchConjugations = async () => {
-                const url: string = `${base_url}/api/verbs`;
+                const url: string = "http://localhost:8080/api/verbs";
 
                 const response = await fetch(url);
 
@@ -266,46 +266,46 @@ export const AdminConjugationWizard = () => {
         const { onNext, onPrevious } = props;
 
         const handleChange = (event: any) => {
-
+ 
             console.log(event.target.name);
             console.log(event.target.value);
             subjectConjugationMap.set(Number(event.target.name), event.target.value);
-        };
+          };
 
-        const convertMapToObject = <K, V>(map: Map<K, V>): Record<string, V> => {
+          const convertMapToObject = <K, V>(map: Map<K, V>): Record<string, V> => {
             const obj: Record<string, V> = {};
             for (const [key, value] of map.entries()) {
-                obj[String(key)] = value;
+              obj[String(key)] = value;
             }
             return obj;
-        };
+          };
+        
 
+        const createConjugationForTenseAndVerb = async ()  => {
+           
+                const url = `http://localhost:8080/api/conjugations?verbID=${verbTenseDTO?.verbid}&tenseID=${selectedTenseField.current?.value}`;
+        
+                const authJson = localStorage.getItem("okta-token-storage");
+                const authStateToken = JSON.parse(authJson !== null ? authJson : "");
 
-        const createConjugationForTenseAndVerb = async () => {
-
-            const url = `${base_url}/api/conjugations?verbID=${verbTenseDTO?.verbid}&tenseID=${selectedTenseField.current?.value}`;
-
-            const authJson = localStorage.getItem("okta-token-storage");
-            const authStateToken = JSON.parse(authJson !== null ? authJson : "");
-
-            // need to wrap subjectConjugationMap.entries in an object
-
-
-            const requestOptions = {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${authStateToken?.accessToken?.accessToken}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(convertMapToObject(subjectConjugationMap)),
-            };
-
-            const createConjugationResponse = await fetch(url, requestOptions);
-            validateAPIResponse(createConjugationResponse);
-            let returnedVerb = createConjugationResponse.json();
-
-            alert("Conjugation created successfully!");
-            // return returnedVerb;
+                // need to wrap subjectConjugationMap.entries in an object
+                
+        
+                const requestOptions = {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${authStateToken?.accessToken?.accessToken}`,
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(convertMapToObject(subjectConjugationMap)),
+                };
+        
+                const createConjugationResponse = await fetch(url, requestOptions);
+                validateAPIResponse(createConjugationResponse);
+                let returnedVerb = createConjugationResponse.json();
+        
+                alert("Conjugation created successfully!");
+               // return returnedVerb;
 
         }
 
@@ -321,24 +321,24 @@ export const AdminConjugationWizard = () => {
 
                 <Row>
 
-                    <Row>
-                        <Col auto className="d-flex justify-content-center">
-                            <label>
-                                <h5>Select a tense:</h5>
-                                <select ref={selectedTenseField} >
-                                    <option selected> -- Select an option -- </option>
-                                    {tenses.map((tense) => (
-                                        <option key={tense.id} value={tense.id}>
-                                            {tense.tense}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                        </Col>
-                    </Row>
-                    <br />
-                    <br />
-                    <Row>
+                        <Row>
+                            <Col auto className="d-flex justify-content-center">
+                                <label>
+                                    <h5>Select a tense:</h5>
+                                    <select ref={selectedTenseField} >
+                                        <option selected> -- Select an option -- </option>
+                                        {tenses.map((tense) => (
+                                            <option key={tense.id} value={tense.id}>
+                                                {tense.tense}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                            </Col>
+                        </Row>
+                        <br />
+                        <br />
+                        <Row>
                         {subjects.map((subject) => (
 
                             <Row key={subject.id} className="d-flex justify-content-center">
@@ -352,9 +352,9 @@ export const AdminConjugationWizard = () => {
                                 </Col>
                             </Row>
                         ))}
-                    </Row>
+                        </Row>
 
-                    <Button onClick={createConjugationForTenseAndVerb}>Save Conjugation</Button>
+                        <Button onClick={createConjugationForTenseAndVerb}>Save Conjugation</Button>
 
                 </Row>
             </Container>

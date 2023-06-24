@@ -1,17 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { FormEvent, useEffect, useState } from "react";
 import { Alert, Col, Container, Form, Row } from "react-bootstrap";
-import { Button } from "reactstrap";
+import { Button, Input } from "reactstrap";
 import Question from "../models/QuestionModel";
 import Answer from "../models/AnswerModel";
 import QuizModel from "../models/QuizModel";
 import { Link, useParams } from "react-router-dom";
 import "./QuizPage.css";
+import { set } from "react-hook-form";
 
 export const QuizPage = () => {
   const [result, setResult] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [quiz, setQuiz] = useState("");
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [answers, setAnswers] = useState(new Map<number, Answer>());
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,14 +27,14 @@ export const QuizPage = () => {
   
   
   const params = useParams();
-  const base_url = `${process.env.REACT_APP_SPRING_BASE_URL}${process.env.REACT_APP_SPRING_PORT}`;
+ 
 
   useEffect(() => {
     const fetchQuiz = async () => {
       setIsLoading(true);
       try {
         const response = await fetch(
-          `${base_url}/api/quizzes/${params.id}`
+          `http://localhost:8080/api/quizzes/${params.id}`
         );
         if (!response.ok) {
           throw new Error("Something went wrong!");

@@ -21,12 +21,10 @@ export const ConjugationHome = () => {
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
   const currentRecords = verbs.slice(indexOfFirstRecord, indexOfLastRecord);
   const nPages = Math.ceil(verbs.length / recordsPerPage)
-  
-  const base_url = `${process.env.REACT_APP_SPRING_BASE_URL}${process.env.REACT_APP_SPRING_PORT}`;
 
   useEffect(() => {
     const fetchVerbs = async () => {
-      const url: string = `${base_url}/api/conjugations/verbs`;
+      const url: string = "http://localhost:8080/api/conjugations/verbs";
 
       const response = await fetch(url);
 

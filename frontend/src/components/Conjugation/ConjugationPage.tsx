@@ -21,8 +21,6 @@ export const ConjugationPage = () => {
 
   const params = useParams();
 
-  const base_url = `${process.env.REACT_APP_SPRING_BASE_URL}${process.env.REACT_APP_SPRING_PORT}`;
-
   const handleChange = (event: any) => {
     let currentConjugation = conjugations.find(
       (conjugation) => conjugation.id == event.target.id
@@ -64,7 +62,7 @@ export const ConjugationPage = () => {
 
   useEffect(() => {
     const fetchTodos = async () => {
-      const url: string = `${base_url}/api/conjugations?verbid=${params.verbid}&tenseid=${params.tenseid}`;
+      const url: string = `http://localhost:8080/api/conjugations?verbid=${params.verbid}&tenseid=${params.tenseid}`;
 
       const response = await fetch(url);
 

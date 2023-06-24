@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
-import { Col, Container, Row } from "reactstrap";
+import { Col, Container, Input, Row } from "reactstrap";
 import { Button, Form } from "react-bootstrap";
+import { set } from "react-hook-form";
 import { redirect, useNavigate } from "react-router-dom";
 import AnswerModel from "../models/AnswerModel";
 import QuestionModel from "../models/QuestionModel";
@@ -21,7 +22,6 @@ export const AdminQuizWizard = () => {
   const [questionName, setQuestionName] = useState("");
   const refAnswer = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const base_url = `${process.env.REACT_APP_SPRING_BASE_URL}${process.env.REACT_APP_SPRING_PORT}`;
 
   const onNext = () => {
     if (step === 1) {
@@ -365,7 +365,7 @@ export const AdminQuizWizard = () => {
     };
 
     const createQuiz = async () => {
-      const url = `${base_url}/api/quizzes/`;
+      const url = `http://localhost:8080/api/quizzes/`;
       if (!quizName) {
         alert("Please enter a quiz name");
         return;

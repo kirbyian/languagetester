@@ -23,13 +23,11 @@ export const AdminQuizzesHome = () => {
   const authStateToken = JSON.parse(authJson !== null ? authJson : "");
   const currentRecords = quizzes.slice(indexOfFirstRecord, indexOfLastRecord);
 
-  const base_url = `${process.env.REACT_APP_SPRING_BASE_URL}${process.env.REACT_APP_SPRING_PORT}`;
-
 
   useEffect(() => {
     const fetchQuizzes = async () => {
 
-      const url: string = `${base_url}/api/quizzes/user`;
+      const url: string = "http://localhost:8080/api/quizzes/user";
 
       const requestOptions = {
           method: "GET",

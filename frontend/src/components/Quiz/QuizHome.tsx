@@ -21,11 +21,9 @@ export const QuizHome = () => {
   const currentRecords = quizzes.slice(indexOfFirstRecord, indexOfLastRecord);
   const nPages = Math.ceil(quizzes.length / recordsPerPage)
 
-  const base_url = `${process.env.REACT_APP_SPRING_BASE_URL}${process.env.REACT_APP_SPRING_PORT}`;
-
   useEffect(() => {
     const fetchTodos = async () => {
-      const url: string = `${base_url}/api/quizzes/all`;
+      const url: string = "http://localhost:8080/api/quizzes/all";
 
       const response = await fetch(url);
 
