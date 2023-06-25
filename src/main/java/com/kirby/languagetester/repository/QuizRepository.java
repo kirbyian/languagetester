@@ -15,4 +15,6 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 	List<Quiz> findByOwner(String owner);
 
 	List<Quiz> findByQuizTypeNot(String quizType);
+	
+	List<Quiz> findByName(String name);
 }

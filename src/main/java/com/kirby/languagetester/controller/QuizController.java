@@ -14,11 +14,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kirby.languagetester.constants.OktaConstants;
-import com.kirby.languagetester.model.Question;
 import com.kirby.languagetester.model.Quiz;
-import com.kirby.languagetester.repository.AnswerRepository;
-import com.kirby.languagetester.repository.QuestionRepository;
 import com.kirby.languagetester.repository.QuizRepository;
+import com.kirby.languagetester.service.QuizService;
 import com.kirby.languagetester.utils.ExtractJWT;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
@@ -31,16 +29,10 @@ public class QuizController {
 	private QuizRepository quizRepository;
 
 	@Autowired
-	private QuestionRepository questionRepository;
+	private QuizService quizService;
 
-	@Autowired
-	private AnswerRepository answerRepository;
-
-	public QuizController(QuizRepository quizRepository, QuestionRepository questionRepository,
-			AnswerRepository answerRepository) {
+	public QuizController(QuizRepository quizRepository) {
 		this.quizRepository = quizRepository;
-		this.questionRepository = questionRepository;
-		this.answerRepository = answerRepository;
 	}
 
 	@GetMapping("/{id}")
@@ -84,24 +76,7 @@ public class QuizController {
 	@PostMapping()
 	public void createQuiz(@RequestHeader(value = "Authorization") String token, @RequestBody Quiz quiz) {
 
-		String userEmail = ExtractJWT.payloadJWTExtraction(token, OktaConstants.SUB);
-		// save new quiz
-		Quiz newQuiz = new Quiz();
-		newQuiz.setName(quiz.getName());
-		newQuiz.setOwner(userEmail);
-		newQuiz.setVersion(0);
-		newQuiz.setQuizType(quiz.getQuizType());
-		quizRepository.save(newQuiz);
-
-		for (Question question : quiz.getQuestions()) {
-			Question newQuestion = new Question();
-			newQuestion.setQuestion(question.getQuestion());
-			newQuestion.setQuizID(newQuiz.getId());
-			newQuestion.setVersion(0);
-			questionRepository.save(newQuestion);
-			question.getAnswers().forEach(answer -> answer.setQuestion_id(newQuestion.getId()));
-			answerRepository.saveAll(question.getAnswers());
-		}
+		quizService.createQuiz(token, quiz);
 
 	}
 
