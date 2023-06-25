@@ -13,7 +13,7 @@ import javax.persistence.Version;
 public abstract class BaseEntity {
 
 	@Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	@Column(name = "lastUpdated")
 	private Timestamp lastUpdated;
