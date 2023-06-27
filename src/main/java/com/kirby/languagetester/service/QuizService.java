@@ -1,5 +1,7 @@
 package com.kirby.languagetester.service;
 
+import java.util.List;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,10 +90,18 @@ public class QuizService {
 					"Unable to create Quiz,name provided already exist, please provide a new one");
 		}
 		// validate if there are questions and Answers
-		if (quiz.getQuestions().isEmpty()
-				|| quiz.getQuestions().stream().filter(question -> question.getAnswers().isEmpty()).count() < 1) {
+		if (quiz.getQuestions().isEmpty() || questionsDoNotContainAnAnswer(quiz.getQuestions()))
 			throw new QuizCreationException("Unable to create Quiz,no questions or answers were provided");
 		}
+
+	private boolean questionsDoNotContainAnAnswer(List<Question> questions) {
+
+		for (Question question : questions) {
+			if (question.getAnswers().isEmpty()) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
