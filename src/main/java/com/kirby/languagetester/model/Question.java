@@ -17,8 +17,7 @@ public class Question extends BaseEntity {
 	@Column(name = "question")
 	private String question;
 
-	@OneToMany(cascade=CascadeType.ALL )
-	@JoinColumn(name = "question_id")
+	@OneToMany(mappedBy = "question_id",cascade=CascadeType.ALL, orphanRemoval = true )
 	private List<Answer> answers = new ArrayList<>();
 	
 	@Column(name="quizID")

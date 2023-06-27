@@ -3,6 +3,7 @@ package com.kirby.languagetester.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +41,16 @@ public class QuizController {
 			return quizRepository.findById(Long.parseLong(id)).get();
 		}
 		return null;
+
+	}
+	
+	@DeleteMapping("/{id}")
+	public String deleteQuizByID(@PathVariable String id) {
+
+		if (StringUtils.isNumeric(id)) {
+			quizRepository.deleteById(Long.parseLong(id));
+		}
+		return "Resource Deleted";
 
 	}
 

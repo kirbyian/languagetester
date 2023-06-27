@@ -14,8 +14,7 @@ import javax.persistence.Table;
 @Table(name = "quizzes")
 public class Quiz extends BaseEntity {
 	
-	@OneToMany(cascade=CascadeType.ALL, orphanRemoval = true )
-	@JoinColumn(name = "quizID" )
+	@OneToMany(mappedBy = "quizID",cascade=CascadeType.ALL, orphanRemoval = true )
 	private List<Question> questions = new ArrayList<>();
 	
 	@Column(name = "quiz_type")
