@@ -3,7 +3,6 @@ package com.kirby.languagetester.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +21,6 @@ import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 @RequestMapping("api/quizzes")
 @RestController
-@CrossOrigin("https://languagetester-react-5effb2069628.herokuapp.com")
 public class QuizController {
 
 	@Autowired

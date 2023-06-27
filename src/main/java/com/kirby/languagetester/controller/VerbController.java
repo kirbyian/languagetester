@@ -3,7 +3,6 @@ package com.kirby.languagetester.controller;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,7 +14,6 @@ import com.kirby.languagetester.model.Verb;
 import com.kirby.languagetester.repository.VerbRepository;
 
 @RestController
-@CrossOrigin("https://languagetester-react-5effb2069628.herokuapp.com")
 @RequestMapping("api/verbs")
 public class VerbController  {
 

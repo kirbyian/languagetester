@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +22,6 @@ import com.kirby.languagetester.utils.ExtractJWT;
 
 @RequestMapping("api/conjugations")
 @RestController()
-@CrossOrigin("https://languagetester-react-5effb2069628.herokuapp.com")
 public class ConjugationController {
 
 	private ConjugationRepository conjugationRepository;

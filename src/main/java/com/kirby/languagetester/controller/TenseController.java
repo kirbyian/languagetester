@@ -3,7 +3,6 @@ package com.kirby.languagetester.controller;
 import java.util.List;
 
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,7 +11,6 @@ import com.kirby.languagetester.model.Tense;
 import com.kirby.languagetester.repository.TenseRepository;
 
 @RestController
-@CrossOrigin("https://languagetester-react-5effb2069628.herokuapp.com")
 @RequestMapping("api/tenses")
 public class TenseController{
 
