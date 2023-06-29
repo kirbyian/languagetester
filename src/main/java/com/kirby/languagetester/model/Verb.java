@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -17,6 +18,10 @@ public class Verb extends BaseEntity {
 
 	@Column(name = "verb")
 	private String verb;
+	
+	@OneToOne()
+	@JoinColumn(name = "languageid")
+	private Language language;
 	
 	public String getVerb() {
 		return verb;
@@ -37,6 +42,14 @@ public class Verb extends BaseEntity {
 
 	public void setVerb(String verb) {
 		this.verb = verb;
+	}
+	
+	public Language getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(Language language) {
+		this.language = language;
 	}
 
 	@Override

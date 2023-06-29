@@ -8,7 +8,9 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "quizzes")
@@ -26,6 +28,12 @@ public class Quiz extends BaseEntity {
 	@Column(name = "owner")
 	private String owner;
 	
+	@OneToOne()
+	@JoinColumn(name = "languageid")
+	private Language language;
+	
+	@Transient
+	private String languageString;
 	
 	public String getOwner() {
 		return owner;
@@ -59,6 +67,20 @@ public class Quiz extends BaseEntity {
 		this.questions = questions;
 	}
 
-	
+	public Language getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(Language language) {
+		this.language = language;
+	}
+
+	public String getLanguageString() {
+		return languageString;
+	}
+
+	public void setLanguageString(String languageString) {
+		this.languageString = languageString;
+	}
 	
 }

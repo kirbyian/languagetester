@@ -1,16 +1,21 @@
 package com.kirby.languagetester.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.Verb;
+import com.kirby.languagetester.repository.LanguageRepository;
 import com.kirby.languagetester.repository.VerbRepository;
 
 @RestController
@@ -18,15 +23,22 @@ import com.kirby.languagetester.repository.VerbRepository;
 public class VerbController  {
 
 	private VerbRepository verbRepository;
+	
+	@Autowired
+	private LanguageRepository languageRepository;
 
 	public VerbController(VerbRepository verbRepository) {
 		this.verbRepository = verbRepository;
 	}
 
 	@GetMapping()
-	public List<Verb> getAllVerbs() {
+	public List<Verb> getAllVerbs(@RequestParam String language) {
 
-		List<Verb> verbs = verbRepository.findAll();
+		Optional<Language> langaugeObject = languageRepository.findBycode(language);
+		List<Verb> verbs = new ArrayList<Verb>();
+		if (langaugeObject.isPresent()) {
+			verbs = verbRepository.findByLanguage(langaugeObject.get());
+		}
 
 		return verbs;
 

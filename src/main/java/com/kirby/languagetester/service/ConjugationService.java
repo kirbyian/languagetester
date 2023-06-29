@@ -6,7 +6,11 @@ import java.util.Map;
 
 import javax.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.kirby.languagetester.conjugation.ConjugationCreationException;
 import com.kirby.languagetester.model.Conjugation;
@@ -26,25 +30,30 @@ public class ConjugationService {
 
 	private static final String UNABLE_TO_CREATE_CONJUGATION = "Unable to create Conjugation:";
 
+	@Autowired
 	private ConjugationRepository conjugationRepository;
 
+	@Autowired
 	private VerbRepository verbRepository;
 
+	@Autowired
 	private TenseRepository tenseRepository;
 
+	@Autowired
 	private SubjectRepository subjectRepository;
 
+	@Autowired
 	private QuizRepository quizRepository;
 
 	@Transactional
-	public List<Conjugation> createConjugation(String verbID, String tenseID, String token,
+	public ResponseEntity<String> createConjugation(String verbID, String tenseID, String token,
 			Map<Long, String> subjectConjugationMap) {
 
 		validateConjugationCreation(verbID, tenseID);
 
 		Tense tense = tenseRepository.getReferenceById(Long.parseLong(tenseID));
 		Verb verb = verbRepository.getReferenceById(Long.parseLong(verbID));
-
+		
 		verb.getTenses().add(tense);
 		verbRepository.save(verb);
 
@@ -58,7 +67,8 @@ public class ConjugationService {
 			conjugations.add(conjugation);
 		}
 
-		return conjugations;
+		String message = "Resource created successfully.";
+        return ResponseEntity.status(HttpStatus.CREATED).body(message); // 201 Created
 	}
 
 	private void validateConjugationCreation(String verbID, String tenseID) {

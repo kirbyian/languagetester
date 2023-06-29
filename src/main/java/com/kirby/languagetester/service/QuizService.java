@@ -74,6 +74,7 @@ public class QuizService {
 		newQuiz.setName(quiz.getName());
 		newQuiz.setOwner(userEmail);
 		newQuiz.setVersion(0);
+		newQuiz.setLanguage(quiz.getLanguage());
 		newQuiz.setQuizType(quiz.getQuizType());
 		quizRepository.save(newQuiz);
 		return newQuiz;
