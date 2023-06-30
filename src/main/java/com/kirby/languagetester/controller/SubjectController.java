@@ -35,7 +35,7 @@ public class SubjectController {
 		Optional<Language> langaugeObject = languageRepository.findBycode(language);
 		List<Subject> subjects = new ArrayList<Subject>();
 		if (langaugeObject.isPresent()) {
-			subjects = subjectRepository.findByLanguage(langaugeObject.get());
+			subjects = subjectRepository.findByLanguageOrderById(langaugeObject.get());
 		}
 
 		return subjects;

@@ -11,6 +11,6 @@ import com.kirby.languagetester.model.Subject;
 @Repository
 public interface SubjectRepository extends JpaRepository<Subject, Long> {
 
-	List<Subject> findByLanguage(Language language);
+	List<Subject> findByLanguageOrderById(Language language);
 
 }
