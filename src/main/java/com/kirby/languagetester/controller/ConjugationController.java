@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kirby.languagetester.constants.OktaConstants;
@@ -61,6 +61,18 @@ public class ConjugationController {
 		return filteredList;
 
 	}
+	
+	@GetMapping("/admin/verbs")
+	public List<Verb> getVerbsAndDistinctTensesForAdmin() {
+
+		List<Verb> verbs = verbRepository.findAll();
+		
+		List<Verb> filteredList = verbs.stream().filter(verb -> !verb.getTenses().isEmpty())
+				.collect(Collectors.toList());
+
+		return filteredList;
+
+	}
 
 	/**
 	 * Went want a list of verbs,
@@ -71,7 +83,7 @@ public class ConjugationController {
 	@GetMapping()
 	public List<Conjugation> getConjugations(@RequestParam Long verbid, @RequestParam Long tenseid) {
 
-		List<Conjugation> conjugations = conjugationRepository.findByVerbIdAndTenseId(verbid, tenseid);
+		List<Conjugation> conjugations = conjugationRepository.findByVerbIdAndTenseIdOrderById(verbid, tenseid);
 
 		return conjugations;
 
@@ -92,7 +104,15 @@ public class ConjugationController {
 			@RequestHeader(value = "Authorization") String token,
 			@RequestBody Map<Long, String> subjectConjugationMap) {
 
-		return conjugationService.createConjugation(verbID, tenseID, token, subjectConjugationMap);
+		return conjugationService.createConjugations(verbID, tenseID, token, subjectConjugationMap);
+	}
+	
+	@PutMapping
+	public ResponseEntity<String> editConjugations(@RequestParam String verbID, @RequestParam String tenseID,
+			@RequestHeader(value = "Authorization") String token,
+			@RequestBody Map<Long, String> subjectConjugationMap) {
+
+		return conjugationService.editConjugations(verbID, tenseID, token, subjectConjugationMap);
 	}
 
 }

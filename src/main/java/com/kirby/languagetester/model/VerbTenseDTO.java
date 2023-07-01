@@ -11,6 +11,8 @@ public class VerbTenseDTO {
 
 	private Integer verbId;
 	
+	private String language;
+	
 	public VerbTenseDTO(Integer verbId, String verbName) {
 		this.verbId=verbId;
 		this.verbName=verbName;
@@ -38,6 +40,15 @@ public class VerbTenseDTO {
 
 	public void setVerbId(Integer verbId) {
 		this.verbId = verbId;
+	}
+	
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
 	}
 
 	@Override

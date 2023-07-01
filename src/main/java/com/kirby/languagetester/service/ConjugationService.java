@@ -46,7 +46,7 @@ public class ConjugationService {
 	private QuizRepository quizRepository;
 
 	@Transactional
-	public ResponseEntity<String> createConjugation(String verbID, String tenseID, String token,
+	public ResponseEntity<String> createConjugations(String verbID, String tenseID, String token,
 			Map<Long, String> subjectConjugationMap) {
 
 		validateConjugationCreation(verbID, tenseID);
@@ -70,6 +70,33 @@ public class ConjugationService {
 		String message = "Resource created successfully.";
         return ResponseEntity.status(HttpStatus.CREATED).body(message); // 201 Created
 	}
+	
+	@Transactional
+	public ResponseEntity<String> editConjugations(String verbID, String tenseID, String token,
+			Map<Long, String> subjectConjugationMap) {
+		
+		List<Conjugation> existingConjugations = conjugationRepository.findByVerbIdAndTenseIdOrderById(Long.parseLong(verbID), Long.parseLong(tenseID));
+
+		if (existingConjugations.isEmpty()) {
+			throw new ConjugationCreationException(
+					buildMessage(verbID, tenseID, "Conjugations do not exists for verb and tense, Cannot Modify"));
+		}
+
+
+		for (Conjugation conjugation : existingConjugations) {
+			
+			String conjugationString = subjectConjugationMap.get(conjugation.getSubject().getId());
+			if(!conjugation.getConjugation().equalsIgnoreCase(conjugationString)) {
+				conjugation.setConjugation(conjugationString);
+				conjugationRepository.save(conjugation);
+			}
+			
+			
+		}
+
+		String message = "Resource created successfully.";
+        return ResponseEntity.status(HttpStatus.OK).body(message); 
+	}
 
 	private void validateConjugationCreation(String verbID, String tenseID) {
 		// validate ids are numeric
@@ -78,7 +105,7 @@ public class ConjugationService {
 		}
 
 		// validate conjugation doesn't exist for verb,tense and subject
-		if (!conjugationRepository.findByVerbIdAndTenseId(Long.parseLong(verbID), Long.parseLong(tenseID)).isEmpty()) {
+		if (!conjugationRepository.findByVerbIdAndTenseIdOrderById(Long.parseLong(verbID), Long.parseLong(tenseID)).isEmpty()) {
 			throw new ConjugationCreationException(
 					buildMessage(verbID, tenseID, "Conjugation already exists for verb and tesnse"));
 		}
