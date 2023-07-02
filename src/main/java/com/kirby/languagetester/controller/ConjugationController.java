@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -113,6 +114,13 @@ public class ConjugationController {
 			@RequestBody Map<Long, String> subjectConjugationMap) {
 
 		return conjugationService.editConjugations(verbID, tenseID, token, subjectConjugationMap);
+	}
+	
+	@DeleteMapping
+	public ResponseEntity<String> deleteConjugations(@RequestParam String verbID, @RequestParam String tenseID,
+			@RequestHeader(value = "Authorization") String token) {
+
+		return conjugationService.deleteConjugations(verbID, tenseID, token);
 	}
 
 }

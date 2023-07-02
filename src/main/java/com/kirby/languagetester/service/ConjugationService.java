@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.kirby.languagetester.conjugation.ConjugationCreationException;
 import com.kirby.languagetester.model.Conjugation;
@@ -96,6 +95,36 @@ public class ConjugationService {
 
 		String message = "Resource created successfully.";
         return ResponseEntity.status(HttpStatus.OK).body(message); 
+	}
+	
+	@Transactional
+	public ResponseEntity<String> deleteConjugations(String verbID, String tenseID, String token) {
+
+		List<Conjugation> existingConjugations=new ArrayList<>();
+		if(StringUtils.isNumeric(verbID) && StringUtils.isNumeric(tenseID)) {
+			existingConjugations=conjugationRepository
+			.findByVerbIdAndTenseIdOrderById(Long.parseLong(verbID), Long.parseLong(tenseID));
+		}
+		
+		Tense tense = tenseRepository.getReferenceById(Long.parseLong(tenseID));
+		Verb verb = verbRepository.getReferenceById(Long.parseLong(verbID));
+		
+		verb.getTenses().remove(tense);
+		verbRepository.save(verb);
+		
+		long quizid=0;
+		for (Conjugation conjugation : existingConjugations) {
+
+			quizid=conjugation.getQuiz().getId();
+			conjugationRepository.delete(conjugation);
+		}
+		
+		if(quizid!=0) {
+			quizRepository.deleteById(quizid);
+		}
+
+		String message = "Resource deleted successfully.";
+		return ResponseEntity.status(HttpStatus.OK).body(message);
 	}
 
 	private void validateConjugationCreation(String verbID, String tenseID) {
