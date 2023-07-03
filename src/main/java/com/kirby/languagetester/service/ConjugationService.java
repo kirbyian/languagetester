@@ -81,8 +81,7 @@ public class ConjugationService {
 			conjugations.add(conjugation);
 		}
 
-		String message = "Resource created successfully.";
-		return ResponseEntity.status(HttpStatus.CREATED).body(message); // 201 Created
+		return ResponseEntity.status(HttpStatus.CREATED).body("Resource created successfully.");
 	}
 
 	@Transactional

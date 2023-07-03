@@ -50,9 +50,10 @@ public class ConjugationController {
 	 * @return
 	 */
 	@GetMapping()
-	public List<Conjugation> getConjugations(@RequestParam Long verbid, @RequestParam Long tenseid) {
+	public ResponseEntity<List<Conjugation>> getConjugations(@RequestParam Long verbid, @RequestParam Long tenseid) {
 
-		return conjugationService.findByVerbIDandTenseId(verbid, tenseid);
+		return new ResponseEntity<List<Conjugation>>(conjugationService.findByVerbIDandTenseId(verbid, tenseid),
+				HttpStatus.OK);
 
 	}
 
