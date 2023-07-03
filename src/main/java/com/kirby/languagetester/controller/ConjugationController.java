@@ -1,12 +1,9 @@
 package com.kirby.languagetester.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,60 +15,31 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kirby.languagetester.constants.OktaConstants;
 import com.kirby.languagetester.model.Conjugation;
-import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.Verb;
-import com.kirby.languagetester.repository.ConjugationRepository;
-import com.kirby.languagetester.repository.LanguageRepository;
-import com.kirby.languagetester.repository.VerbRepository;
 import com.kirby.languagetester.service.ConjugationService;
-import com.kirby.languagetester.utils.ExtractJWT;
 
 @RequestMapping("api/conjugations")
 @RestController()
 public class ConjugationController {
 
-	private ConjugationRepository conjugationRepository;
-
-	private VerbRepository verbRepository;
-
-	@Autowired
 	private ConjugationService conjugationService;
-	
-	@Autowired
-	private LanguageRepository languageRepository;
 
-	public ConjugationController(ConjugationRepository conjugationRepository, VerbRepository verbRepository) {
-		this.conjugationRepository = conjugationRepository;
-		this.verbRepository = verbRepository;
+	public ConjugationController(ConjugationService conjugationService) {
+		this.conjugationService = conjugationService;
 	}
 
 	@GetMapping("/verbs")
 	public List<Verb> getVerbsAndDistinctTenses(@RequestParam String language) {
 
-		Optional<Language> langaugeObject = languageRepository.findBycode(language);
-		List<Verb> verbs = new ArrayList<Verb>();
-		if(langaugeObject.isPresent()) {
-			verbs = verbRepository.findByLanguage(langaugeObject.get());
-		}
-		
-		List<Verb> filteredList = verbs.stream().filter(verb -> !verb.getTenses().isEmpty())
-				.collect(Collectors.toList());
-
-		return filteredList;
+		return conjugationService.getVerbAndTensesByLanguage(language);
 
 	}
-	
+
 	@GetMapping("/admin/verbs")
 	public List<Verb> getVerbsAndDistinctTensesForAdmin() {
 
-		List<Verb> verbs = verbRepository.findAll();
-		
-		List<Verb> filteredList = verbs.stream().filter(verb -> !verb.getTenses().isEmpty())
-				.collect(Collectors.toList());
-
-		return filteredList;
+		return conjugationService.findAllVerbsWithConjugations();
 
 	}
 
@@ -84,19 +52,15 @@ public class ConjugationController {
 	@GetMapping()
 	public List<Conjugation> getConjugations(@RequestParam Long verbid, @RequestParam Long tenseid) {
 
-		List<Conjugation> conjugations = conjugationRepository.findByVerbIdAndTenseIdOrderById(verbid, tenseid);
-
-		return conjugations;
+		return conjugationService.findByVerbIDandTenseId(verbid, tenseid);
 
 	}
 
 	@GetMapping("/user")
-	public List<Conjugation> getConjugationsByOwner(@RequestHeader(value = "Authorization") String token) {
+	public ResponseEntity<List<Conjugation>> getConjugationsByOwner(
+			@RequestHeader(value = "Authorization") String token) {
 
-		String userEmail = ExtractJWT.payloadJWTExtraction(token, OktaConstants.SUB);
-		List<Conjugation> conjugations = conjugationRepository.findByOwner(userEmail);
-
-		return conjugations;
+		return new ResponseEntity<List<Conjugation>>(conjugationService.findConjugationsByOwner(token), HttpStatus.OK);
 
 	}
 
@@ -107,7 +71,7 @@ public class ConjugationController {
 
 		return conjugationService.createConjugations(verbID, tenseID, token, subjectConjugationMap);
 	}
-	
+
 	@PutMapping
 	public ResponseEntity<String> editConjugations(@RequestParam String verbID, @RequestParam String tenseID,
 			@RequestHeader(value = "Authorization") String token,
@@ -115,7 +79,7 @@ public class ConjugationController {
 
 		return conjugationService.editConjugations(verbID, tenseID, token, subjectConjugationMap);
 	}
-	
+
 	@DeleteMapping
 	public ResponseEntity<String> deleteConjugations(@RequestParam String verbID, @RequestParam String tenseID,
 			@RequestHeader(value = "Authorization") String token) {

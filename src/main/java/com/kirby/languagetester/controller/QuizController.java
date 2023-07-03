@@ -1,8 +1,6 @@
 package com.kirby.languagetester.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,94 +13,59 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.kirby.languagetester.constants.OktaConstants;
-import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.Quiz;
-import com.kirby.languagetester.repository.LanguageRepository;
-import com.kirby.languagetester.repository.QuizRepository;
 import com.kirby.languagetester.service.QuizService;
-import com.kirby.languagetester.utils.ExtractJWT;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 @RequestMapping("api/quizzes")
 @RestController
 public class QuizController {
 
-	private static final String CONJUGATION = "CONJUGATION";
-
-	@Autowired
-	private QuizRepository quizRepository;
-
 	@Autowired
 	private QuizService quizService;
 
-	@Autowired
-	private LanguageRepository languageRepository;
-
-	public QuizController(QuizRepository quizRepository) {
-		this.quizRepository = quizRepository;
+	public QuizController(QuizService quizService) {
+		this.quizService = quizService;
 	}
 
 	@GetMapping("/{id}")
 	public Quiz getQuestionsByQuizID(@PathVariable String id) {
 
-		if (StringUtils.isNumeric(id)) {
-			return quizRepository.findById(Long.parseLong(id)).get();
-		}
-		return null;
+		return quizService.getQuestionsByQuizId(id);
 
 	}
 
 	@DeleteMapping("/{id}")
-	public String deleteQuizByID(@PathVariable String id) {
+	public void deleteQuizByID(@PathVariable String id) {
 
-		if (StringUtils.isNumeric(id)) {
-			quizRepository.deleteById(Long.parseLong(id));
-		}
-		return "Resource Deleted";
+		quizService.deleteByQuizID(id);
 
 	}
 
 	@GetMapping
 	public List<Quiz> getQuizzesByQuizType(@RequestParam String quizType) {
 
-		List<Quiz> quizzes = quizRepository.findByQuizType(quizType.toUpperCase());
-
-		return quizzes;
+		return quizService.findQuizzesByType(quizType);
 
 	}
 
 	@GetMapping("/user")
 	public List<Quiz> getQuizzesByOwner(@RequestHeader(value = "Authorization") String token) {
 
-		String userEmail = ExtractJWT.payloadJWTExtraction(token, OktaConstants.SUB);
-		List<Quiz> quizzes = quizRepository.findByOwner(userEmail);
-
-		return quizzes;
+		return quizService.findQuizzesByOwner(token);
 
 	}
 
 	@GetMapping("/all")
 	public List<Quiz> getAllQuizzes(@RequestParam String language) {
 
-		Optional<Language> langaugeObject = languageRepository.findBycode(language);
-		List<Quiz> quizzes = new ArrayList<Quiz>();
-		if (langaugeObject.isPresent()) {
-			quizzes = quizRepository.findByLanguageAndQuizTypeNot(langaugeObject.get(), CONJUGATION);
-		}
-
-		return quizzes;
+		return quizService.findNonConjugationTypeQuizzes(language);
 
 	}
 
 	@PostMapping()
 	public void createQuiz(@RequestHeader(value = "Authorization") String token, @RequestBody Quiz quiz) {
 
-		Optional<Language> langaugeObject = languageRepository.findBycode(quiz.getLanguageString());
-		if (langaugeObject.isPresent()) {
-			quiz.setLanguage(langaugeObject.get());
-			quizService.createQuiz(token, quiz);
-		}
+		quizService.createQuiz(token, quiz);
 
 	}
 

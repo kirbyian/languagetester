@@ -6,9 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
+
+@Service
 public class ExtractJWT {
 
-	public static String payloadJWTExtraction(String token, String extraction) {
+	public String payloadJWTExtraction(String token, String extraction) {
 
 		token = token.replace("Bearer ", "");
 
@@ -40,7 +43,7 @@ public class ExtractJWT {
 		return null;
 	}
 	
-	public static List<String> payloadJWTExtractRoles(String token, String extraction) {
+	public List<String> payloadJWTExtractRoles(String token, String extraction) {
 
 		token = token.replace("Bearer ", "");
 

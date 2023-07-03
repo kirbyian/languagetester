@@ -11,7 +11,7 @@ import com.kirby.languagetester.model.Quiz;
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
 
-	List<Quiz> findByQuizType(String quizType);
+	List<Quiz> findByQuizTypeIgnoreCase(String quizType);
 	
 	List<Quiz> findByOwner(String owner);
 
