@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.kirby.languagetester.controller.dto.LanguageCategoryDto;
 import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.VocabularyItem;
 import com.kirby.languagetester.repository.LanguageRepository;
@@ -41,6 +42,25 @@ public class VocabularyController {
 		}
 
 		return new ResponseEntity(vocabularyItems, HttpStatus.OK);
+
+	}
+
+	@GetMapping("/categories")
+	public ResponseEntity<LanguageCategoryDto> getCategoriesByLanguage(@RequestParam String language) {
+
+		Optional<Language> optionalLanguage = languageRepository.findBycode(language);
+		List<String> distinctCategoriesByLanguage = new ArrayList<>();
+
+		LanguageCategoryDto languageCategoryDTO = new LanguageCategoryDto();
+
+		if (optionalLanguage.isPresent()) {
+			languageCategoryDTO.setLanguage(optionalLanguage.get().getName());
+			distinctCategoriesByLanguage = vocabItemRepository
+					.findAllDistinctCategories(optionalLanguage.get().getId());
+			languageCategoryDTO.setCategories(distinctCategoriesByLanguage);
+		}
+
+		return new ResponseEntity(languageCategoryDTO, HttpStatus.OK);
 
 	}
 
