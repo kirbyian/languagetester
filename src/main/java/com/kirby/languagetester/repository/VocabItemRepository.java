@@ -1,6 +1,7 @@
 package com.kirby.languagetester.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +17,7 @@ public interface VocabItemRepository extends JpaRepository<VocabularyItem, Long>
 
 	@Query("SELECT DISTINCT vi.category FROM VocabularyItem vi WHERE vi.language.id = ?1")
 	List<String> findAllDistinctCategories(Long languageId);
+
+	Optional<VocabularyItem> findByLanguageAndWord(Language language, String word);
 
 }
