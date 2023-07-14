@@ -17,21 +17,21 @@ import com.kirby.languagetester.audio.extractor.AudioDownloader;
 
 @RestController()
 @RequestMapping("api/vocabularyitem")
-public class FileUploadController {
+public class VocabularyFileUploadController {
 
 	private AudioDownloader audioDownloader;
 
-	public FileUploadController(AudioDownloader audioDownloader) {
+	public VocabularyFileUploadController(AudioDownloader audioDownloader) {
 		this.audioDownloader = audioDownloader;
 	}
 
 	@PostMapping("/upload")
-	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws Exception {
 		try {
 			byte[] bytes = file.getBytes();
 			Path path = Paths.get("../uploads" + file.getOriginalFilename());
 			Files.write(path, bytes);
-			audioDownloader.extractAudioFiles(path);
+			audioDownloader.processVocabularyItems(path);
 
 			return new ResponseEntity<>("File uploaded successfully", HttpStatus.OK);
 		} catch (IOException e) {

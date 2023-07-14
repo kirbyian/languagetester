@@ -77,9 +77,16 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			  <version>42.3.8</version>
+			<version>42.3.8</version>
 		</dependency>
-		
+
+		<!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-s3 -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-s3</artifactId>
+			<version>1.12.504</version>
+		</dependency>
+
 	</dependencies>
 
 	<repositories>
@@ -88,7 +95,6 @@
 			<url>https://repo.eclipse.org/content/repositories/jgit-releases/</url>
 		</repository>
 	</repositories>
-
 	<build>
 		<plugins>
 			<plugin>

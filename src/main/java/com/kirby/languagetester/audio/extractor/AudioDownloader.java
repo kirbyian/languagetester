@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,6 +26,7 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,48 +35,66 @@ import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.VocabularyItem;
 import com.kirby.languagetester.repository.LanguageRepository;
 import com.kirby.languagetester.repository.VocabItemRepository;
+import com.kirby.languagetester.service.S3Service;
 
 @Service
 public class AudioDownloader {
 
-	private String baseReactDir = "/Users/iankirby/react/language-app/languagetester-react/src/assets/audio";
-	private String fileURL = "https://speechgen.io/index.php?r=api/text";
+	private String speechGenURL = "https://speechgen.io/index.php?r=api/text";
+
+	private String awsBaseURL = "https://kirbylanguageapp.s3.eu-west-1.amazonaws.com/";
 
 	private VocabItemRepository vocabItemRepository;
 
 	private LanguageRepository languageRepository;
 
-	public AudioDownloader(VocabItemRepository vocabItemRepository,
-			LanguageRepository languageRepository) {
+	private S3Service s3Service;
+
+	public AudioDownloader(VocabItemRepository vocabItemRepository, LanguageRepository languageRepository,
+			S3Service s3Service) {
 		this.vocabItemRepository = vocabItemRepository;
 		this.languageRepository = languageRepository;
+		this.s3Service = s3Service;
 	}
 
-	public void extractAudioFiles(Path path) throws JsonMappingException, JsonProcessingException {
-
-		// get files from current directory
-
-		// parse file
+	@Transactional
+	public void processVocabularyItems(Path path) throws Exception {
 
 		// check if word exists for vocabulary item by word and language
 		List<VocabularyItem> vocabularyItems = parseFileinCurrentDirectory(path);
 
 		for (VocabularyItem vocabularyItem : vocabularyItems) {
+
+			validateItem(vocabularyItem);
 			Optional<VocabularyItem> foundVocabItem = vocabItemRepository
 					.findByLanguageAndWord(vocabularyItem.getLanguage(), vocabularyItem.getWord());
+			String vocabularyItemPath = "audio/" + vocabularyItem.getLanguage().getName().toLowerCase() + "/"
+					+ vocabularyItem.getCategory() + "/" + vocabularyItem.getWord().trim()+".mp3";
 
-			if (!foundVocabItem.isPresent()) {
-				// save
-				vocabularyItem = vocabItemRepository.save(vocabularyItem);
-			} else {
+			if (foundVocabItem.isPresent()) {
 				vocabularyItem = foundVocabItem.get();
 			}
 
-			String reactUrl = baseReactDir + "/" + vocabularyItem.getLanguage().getName() + "/"
-					+ vocabularyItem.getCategory()+"/"+vocabularyItem.getWord().trim();
-			//postToTextToSpeech(fileURL, vocabularyItem.getWord(), vocabularyItem.getCategory(),reactUrl);
+			boolean exists = s3Service.getAWSFileURL(vocabularyItemPath);
+			if (!exists) {
+				String fileToUpload = postToTextToSpeech(vocabularyItem.getWord());
+				PutObjectResult uploadedFile = s3Service.uploadFile(fileToUpload, vocabularyItemPath);
+				if (uploadedFile != null) {
+					vocabularyItem.setAudioUrl(awsBaseURL + vocabularyItemPath);
+				}
+
+			}else {
+				vocabularyItem.setAudioUrl(awsBaseURL+vocabularyItemPath);
+			}
+			// upload to AWS
+
+			vocabularyItem = vocabItemRepository.save(vocabularyItem);
+
 		}
-		// sendRequest(fileURL, text, "furniture");
+	}
+
+	private void validateItem(VocabularyItem vocabularyItem) throws Exception {
+
 	}
 
 	public List<VocabularyItem> parseFileinCurrentDirectory(Path file) {
@@ -95,9 +116,7 @@ public class AudioDownloader {
 					item.setTranslation(lineValues[1]);
 					item.setCategory(lineValues[2]);
 					Optional<Language> languageObject = languageRepository.findBycode(lineValues[3]);
-					System.out.println(lineValues[0]);
 					item.setLanguage(languageObject.get());
-					item.setAudioUrl(lineValues[0]+".mp3");
 					vocabularyItems.add(item);
 				}
 
@@ -108,13 +127,13 @@ public class AudioDownloader {
 		return vocabularyItems;
 	}
 
-	public static void postToTextToSpeech(String url, String text, String category,String reactUrl)
-			throws JsonMappingException, JsonProcessingException {
+	public String postToTextToSpeech(String text) throws JsonMappingException, JsonProcessingException {
 		RestTemplate restTemplate = new RestTemplate();
 
 		// Create headers
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		String audioFilePath = "";
 
 		// Create parameters
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
@@ -128,7 +147,7 @@ public class AudioDownloader {
 		// Send the request as POST
 		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-		ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+		ResponseEntity<String> response = restTemplate.postForEntity(speechGenURL, request, String.class);
 		if (response.getStatusCode() == HttpStatus.OK) {
 
 			String responseBody = response.getBody();
@@ -136,15 +155,15 @@ public class AudioDownloader {
 			JsonNode rootNode = mapper.readTree(responseBody);
 
 			// Assuming the response body is a JSON object...
-			String fileUrl = rootNode.get("file").asText();
+			String speechGenFileURL = rootNode.get("file").asText();
+			audioFilePath = "./audio" + text.trim() + ".mp3";
 
-			downloadFile(fileUrl, text.trim());
-			
-
+			downloadFile(speechGenFileURL, audioFilePath);
 		}
+		return audioFilePath;
 	}
 
-	public static void downloadFile(String url, String fileName) {
+	public void downloadFile(String url, String fileName) {
 		RestTemplate restTemplate = new RestTemplate();
 
 		RequestCallback requestCallback = restTemplate.httpEntityCallback(null, null);
@@ -152,7 +171,7 @@ public class AudioDownloader {
 		ResponseExtractor<Void> responseExtractor = new ResponseExtractor<Void>() {
 			@Override
 			public Void extractData(ClientHttpResponse response) throws IOException {
-				FileOutputStream fileOutputStream = new FileOutputStream(fileName + ".mp3"); // Output file path
+				FileOutputStream fileOutputStream = new FileOutputStream(fileName); // Output file path
 				StreamUtils.copy(response.getBody(), fileOutputStream);
 				fileOutputStream.close();
 				return null;
