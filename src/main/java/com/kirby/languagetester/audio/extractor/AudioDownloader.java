@@ -77,7 +77,7 @@ public class AudioDownloader {
 
 			boolean exists = s3Service.getAWSFileURL(vocabularyItemPath);
 			if (!exists) {
-				String fileToUpload = postToTextToSpeech(vocabularyItem.getWord());
+				String fileToUpload = postToTextToSpeech(vocabularyItem);
 				PutObjectResult uploadedFile = s3Service.uploadFile(fileToUpload, vocabularyItemPath);
 				if (uploadedFile != null) {
 					vocabularyItem.setAudioUrl(awsBaseURL + vocabularyItemPath);
@@ -127,7 +127,7 @@ public class AudioDownloader {
 		return vocabularyItems;
 	}
 
-	public String postToTextToSpeech(String text) throws JsonMappingException, JsonProcessingException {
+	public String postToTextToSpeech(VocabularyItem vocabularyItem) throws JsonMappingException, JsonProcessingException {
 		RestTemplate restTemplate = new RestTemplate();
 
 		// Create headers
@@ -139,8 +139,13 @@ public class AudioDownloader {
 		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 		map.add("token", "f3d42938737ceab9ebd801cbc20ce532");
 		map.add("email", "iankirby1991@hotmail.com");
-		map.add("voice", "Yara");
-		map.add("text", text);
+		if(vocabularyItem.getLanguage().getCode().equals("pt")){
+			map.add("voice", "Yara");
+		}else if(vocabularyItem.getLanguage().getCode().equals("fr")) {
+			map.add("voice", "Lea");
+		}
+		
+		map.add("text", vocabularyItem.getWord());
 		map.add("format", "mp3");
 
 		// Build the request
@@ -156,7 +161,7 @@ public class AudioDownloader {
 
 			// Assuming the response body is a JSON object...
 			String speechGenFileURL = rootNode.get("file").asText();
-			audioFilePath = "./audio" + text.trim() + ".mp3";
+			audioFilePath = "./audio" + vocabularyItem.getWord().trim() + ".mp3";
 
 			downloadFile(speechGenFileURL, audioFilePath);
 		}
