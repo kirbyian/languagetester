@@ -33,7 +33,14 @@ public class VocabularyFileUploadController {
 	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) throws Exception {
 		try {
 			byte[] bytes = file.getBytes();
-			Path path = Paths.get("/tmp/uploads/" + file.getOriginalFilename());
+			String directoryPath = "/tmp/uploads/";
+	        Path directory = Paths.get(directoryPath);
+			
+			 // Create the directory if it doesn't exist
+	        if (!Files.exists(directory)) {
+	            Files.createDirectories(directory);
+	        }
+			Path path = Paths.get(directoryPath + file.getOriginalFilename());
 			logger.info("Writing file to path:"+path.toString());
 			Files.write(path, bytes);
 			audioDownloader.processVocabularyItems(path);
