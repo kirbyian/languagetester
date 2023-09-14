@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -46,6 +47,7 @@ public class VocabularyController {
 	}
 
 	@GetMapping("/categories")
+	@Cacheable("categories-vocabulary")
 	public ResponseEntity<LanguageCategoryDto> getCategoriesByLanguage(@RequestParam String language) {
 
 		Optional<Language> optionalLanguage = languageRepository.findBycode(language);

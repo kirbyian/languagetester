@@ -3,6 +3,7 @@ package com.kirby.languagetester.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,6 +38,7 @@ public class ConjugationController {
 	}
 
 	@GetMapping("/admin/verbs")
+	@Cacheable("conjugations")
 	public List<Verb> getVerbsAndDistinctTensesForAdmin() {
 
 		return conjugationService.findAllVerbsWithConjugations();
