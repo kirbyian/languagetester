@@ -86,3 +86,4 @@ Thumbs.db
 *.ear
 *.jar
 *.factorypath
+/env_list
