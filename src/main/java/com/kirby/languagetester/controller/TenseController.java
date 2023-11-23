@@ -19,7 +19,7 @@ import com.kirby.languagetester.repository.TenseRepository;
 @RestController
 @RequestMapping("api/tenses")
 public class TenseController {
-	//test5
+	//test6
 
 	private TenseRepository tenseRepository;
 
