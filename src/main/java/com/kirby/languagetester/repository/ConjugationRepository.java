@@ -14,10 +14,13 @@ public interface ConjugationRepository extends JpaRepository<Conjugation, Intege
 	@CacheEvict("conjugationsByVerbAndTense")
 	List<Conjugation> findByVerbIdAndTenseIdOrderById(Long verbId, Long tenseId);
 
+	@CacheEvict("conjugationByQuizID")
 	List<Conjugation> findByQuizId(Integer quizid);
 
+	@CacheEvict("conjugationByVerbID")
 	List<Conjugation> findByVerbId(Integer verbid);
 
+	@CacheEvict("conjugationByOwner")
 	List<Conjugation> findByOwner(String owner);
 
 }

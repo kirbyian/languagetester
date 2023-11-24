@@ -194,9 +194,8 @@ public class ConjugationService {
 
 		List<Verb> verbs = verbRepository.findAll();
 
-		List<Verb> filteredList = verbs.stream().filter(verb -> !verb.getTenses().isEmpty())
+		return verbs.stream().filter(verb -> !verb.getTenses().isEmpty())
 				.collect(Collectors.toList());
-		return filteredList;
 	}
 
 	public List<Verb> getVerbAndTensesByLanguage(String language) {

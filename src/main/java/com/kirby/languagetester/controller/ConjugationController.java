@@ -31,6 +31,7 @@ public class ConjugationController {
 	}
 
 	@GetMapping("/verbs")
+	@Cacheable("verbsAndTensesByLanguage")
 	public List<Verb> getVerbsAndDistinctTenses(@RequestParam String language) {
 
 		return conjugationService.getVerbAndTensesByLanguage(language);
