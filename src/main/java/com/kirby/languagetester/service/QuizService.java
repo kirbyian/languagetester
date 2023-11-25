@@ -165,7 +165,7 @@ public class QuizService {
 
 	public List<Quiz> findNonConjugationTypeQuizzes(String language) {
 		Optional<Language> langaugeObject = languageRepository.findBycode(language);
-		List<Quiz> quizzes = new ArrayList<Quiz>();
+		List<Quiz> quizzes = new ArrayList<>();
 		if (langaugeObject.isPresent()) {
 			quizzes = quizRepository.findByLanguageAndQuizTypeNot(langaugeObject.get(), QuizConstants.CONJUGATION);
 		}

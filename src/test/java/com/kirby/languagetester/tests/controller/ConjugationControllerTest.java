@@ -1,4 +1,4 @@
-package com.kirby.languagetester.controller;
+package com.kirby.languagetester.tests.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import com.kirby.languagetester.controller.ConjugationController;
 import com.kirby.languagetester.model.Conjugation;
 import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.Verb;
