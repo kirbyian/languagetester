@@ -36,7 +36,7 @@ import com.kirby.languagetester.model.QuizTypes;
 import com.kirby.languagetester.service.QuizService;
 
 @RestController()
-@RequestMapping("api/quizzes")
+@RequestMapping("api/quiz")
 public class QuizFileUploadController {
 
 	private Logger logger = LoggerFactory.getLogger(QuizFileUploadController.class);
@@ -47,7 +47,7 @@ public class QuizFileUploadController {
 		this.quizService = quizService;
 	}
 
-	@PostMapping("/upload")
+	@PostMapping(value = "/upload", produces = "application/json")
 	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
 			@RequestHeader(value = "Authorization") String token) throws Exception {
 		try {

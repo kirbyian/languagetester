@@ -39,7 +39,7 @@ class QuizFileUploadControllerTest {
         MockMultipartFile multipartFile = new MockMultipartFile("file", "test.csv", "text/csv",
                 Files.readAllBytes(testFilePath));
 
-        mockMvc.perform(multipart("/api/quizzes/upload")
+        mockMvc.perform(multipart("/api/quiz/upload")
                 .file(multipartFile)
                 .header("Authorization", "your-token"))
                 .andExpect(status().isOk());
