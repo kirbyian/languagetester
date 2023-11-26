@@ -47,7 +47,7 @@ public class QuizFileUploadController {
 		this.quizService = quizService;
 	}
 
-	@PostMapping(value = "/upload", produces = "application/json")
+	@PostMapping(value = "/upload")
 	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
 			@RequestHeader(value = "Authorization") String token) throws Exception {
 		try {
