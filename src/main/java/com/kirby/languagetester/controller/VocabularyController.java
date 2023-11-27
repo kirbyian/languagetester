@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +49,7 @@ public class VocabularyController {
 
 	@GetMapping("/categories")
 	@CacheEvict("categories-vocabulary")
+	@Scheduled(fixedRateString = "${caching.spring.generalTTL}")
 	public ResponseEntity<LanguageCategoryDto> getCategoriesByLanguage(@RequestParam String language) {
 
 		Optional<Language> optionalLanguage = languageRepository.findBycode(language);

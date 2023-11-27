@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,6 +33,7 @@ public class ConjugationController {
 
 	@GetMapping("/verbs")
 	@Cacheable("verbsAndTensesByLanguage")
+	@Scheduled(fixedRateString = "${caching.spring.generalTTL}")
 	public List<Verb> getVerbsAndDistinctTenses(@RequestParam String language) {
 
 		return conjugationService.getVerbAndTensesByLanguage(language);
@@ -40,6 +42,7 @@ public class ConjugationController {
 
 	@GetMapping("/admin/verbs")
 	@Cacheable("conjugations")
+	@Scheduled(fixedRateString = "${caching.spring.generalTTL}")
 	public List<Verb> getVerbsAndDistinctTensesForAdmin() {
 
 		return conjugationService.findAllVerbsWithConjugations();

@@ -3,7 +3,8 @@ package com.kirby.languagetester.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -57,7 +58,8 @@ public class QuizController {
 	}
 
 	@GetMapping("/all")
-	@Cacheable("quizzes")
+	@CacheEvict("quizzes")
+	@Scheduled(fixedRateString = "${caching.spring.generalTTL}")
 	public List<Quiz> getAllQuizzes(@RequestParam String language) {
 
 		return quizService.findNonConjugationTypeQuizzes(language);
