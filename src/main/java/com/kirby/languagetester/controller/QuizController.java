@@ -59,7 +59,7 @@ public class QuizController {
 
 	@GetMapping("/all")
 	@CacheEvict("quizzes")
-	@Scheduled(fixedRateString = "${caching.spring.generalTTL}")
+	//@Scheduled(fixedRateString = "${caching.spring.generalTTL}")
 	public List<Quiz> getAllQuizzes(@RequestParam String language) {
 
 		return quizService.findNonConjugationTypeQuizzes(language);
