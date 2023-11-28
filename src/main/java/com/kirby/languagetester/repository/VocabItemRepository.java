@@ -15,7 +15,7 @@ public interface VocabItemRepository extends JpaRepository<VocabularyItem, Long>
 
 	List<VocabularyItem> findByCategoryIgnoreCaseAndLanguage(String category, Language language);
 
-	@Query("SELECT DISTINCT vi.category FROM VocabularyItem vi WHERE vi.language.id = ?1")
+	@Query("SELECT DISTINCT vi.category FROM VocabularyItem vi WHERE vi.language.id = ?1 ORDER BY vi.category")
 	List<String> findAllDistinctCategories(Long languageId);
 
 	Optional<VocabularyItem> findByLanguageAndWord(Language language, String word);
