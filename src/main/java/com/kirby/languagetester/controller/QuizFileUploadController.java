@@ -50,7 +50,7 @@ public class QuizFileUploadController {
 
 	@PostMapping(value = "/upload")
 	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file,
-			@RequestHeader(value = "Authorization") String token) throws Exception {
+			@RequestHeader(value = "Authorization") String token) throws CsvValidationException  {
 		try {
 			byte[] bytes = file.getBytes();
 			String directoryPath = "/tmp/uploads/";
@@ -89,7 +89,6 @@ public class QuizFileUploadController {
 		quiz.setQuizType(QuizTypes.VOCABULARY.name());
 
 		try (CSVReader reader = new CSVReader(new FileReader(file.toString()))) {
-			String[] nextLine;
 			// Read and store all lines
 			addLinesToList(lines, reader);
 
