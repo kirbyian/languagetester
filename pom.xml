@@ -73,10 +73,16 @@
 			<artifactId>aws-java-sdk-s3</artifactId>
 			<version>1.12.504</version>
 		</dependency>
-		
-			<dependency>
+
+		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>5.8</version> <!-- Use the latest version -->
 		</dependency>
 
 

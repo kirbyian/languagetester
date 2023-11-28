@@ -1,6 +1,5 @@
 package com.kirby.languagetester.controller;
 
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -34,6 +33,8 @@ import com.kirby.languagetester.model.Question;
 import com.kirby.languagetester.model.Quiz;
 import com.kirby.languagetester.model.QuizTypes;
 import com.kirby.languagetester.service.QuizService;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 
 @RestController()
 @RequestMapping("api/quiz")
@@ -62,7 +63,7 @@ public class QuizFileUploadController {
 			Path path = Paths.get(directoryPath + file.getOriginalFilename());
 			logger.info("Writing file to path:" + path.toString());
 			Files.write(path, bytes);
-			createQuizByUpload(path,token);
+			createQuizByUpload(path, token);
 
 			return new ResponseEntity<>("File uploaded successfully", HttpStatus.OK);
 		} catch (IOException e) {
@@ -72,7 +73,7 @@ public class QuizFileUploadController {
 	}
 
 	@Transactional
-	public void createQuizByUpload(Path path,String token) {
+	public void createQuizByUpload(Path path, String token) throws CsvValidationException {
 
 		// check if word exists for vocabulary item by word and language
 		Quiz quiz = parseFileinCurrentDirectory(path);
@@ -80,71 +81,81 @@ public class QuizFileUploadController {
 
 	}
 
-	public Quiz parseFileinCurrentDirectory(Path file) {
-	    Quiz quiz = new Quiz();
-	    List<Question> questions = new ArrayList<>();
-	    List<String> lines = new ArrayList<>();
-	    
-	    quiz.setQuizType(QuizTypes.VOCABULARY.name());
+	public Quiz parseFileinCurrentDirectory(Path file) throws CsvValidationException {
+		Quiz quiz = new Quiz();
+		List<Question> questions = new ArrayList<>();
+		List<String[]> lines = new ArrayList<>();
 
-	    try (BufferedReader reader = new BufferedReader(new FileReader(file.toString()))) {
-	        // Read and store all lines
-	        String line;
-	        while ((line = reader.readLine()) != null) {
-	            lines.add(line);
-	        }
-	        
-	        if(!lines.isEmpty()) {
-	        	 String[] lineValues = lines.get(0).split(",");
-	        	quiz.setName(lineValues[0]);
-	        	quiz.setLanguageString(lineValues[1]);
-	        }
+		quiz.setQuizType(QuizTypes.VOCABULARY.name());
 
-	        // Process lines
-	        for (int i = 0; i < lines.size(); i++) {
-	            String[] lineValues = lines.get(i).split(",");
+		try (CSVReader reader = new CSVReader(new FileReader(file.toString()))) {
+			String[] nextLine;
+			// Read and store all lines
+			addLinesToList(lines, reader);
 
-	            if (lineValues.length > 0 && lineValues[0].equalsIgnoreCase("q")) {
-	                Question question = new Question();
-	                question.setQuestion(lineValues[1]);
+			// Set Name and Language String from first line
+			setQuizNameAndLanguage(quiz, lines);
 
-	                // Process answers
-	                for (int j = i + 1; j < lines.size(); j++) {
-	                    String[] answerValues = lines.get(j).split(",");
+			// Process lines
+			for (int i = 0; i < lines.size(); i++) {
 
-	                    if (answerValues.length > 0 && answerValues[0].equalsIgnoreCase("a")) {
-	                        Answer answer = new Answer();
-	                        answer.setAnswer(answerValues[1]);
-	                        answer.setCorrect(answerValues.length > 2 && "y".equalsIgnoreCase(answerValues[2].trim()));
-	                        question.addAnswer(answer);
-	                    } else {
-	                        // If the line doesn't start with "a," it's the next question
-	                        i = j - 1; // Move the outer loop index back to the last processed line
-	                        break;
-	                    }
-	                }
+				if (lines.get(i).length > 0 && lines.get(i)[0].equalsIgnoreCase("q")) {
+					i = addQuestionToList(questions, lines, i);
+				}
+			}
 
-	                // Set the question only if there are answers
-	                if (!question.getAnswers().isEmpty()) {
-	                    questions.add(question);
-	                }
-	            }
-	        }
+			// Set questions for the quiz
+			quiz.setQuestions(questions);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
-	        // Set questions for the quiz
-	        quiz.setQuestions(questions);
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-
-	    return quiz;
+		return quiz;
 	}
 
+	private int addQuestionToList(List<Question> questions, List<String[]> lines, int i) {
+		Question question = new Question();
+		question.setQuestion(lines.get(i)[1]);
 
+		// Process answers
+		for (int j = i + 1; j < lines.size(); j++) {
 
+			if (lines.get(j).length > 0 && lines.get(j)[0].equalsIgnoreCase("a")) {
+				setAnswer(lines, question, j);
+			} else {
+				// If the line doesn't start with "a," it's the next question
+				i = j - 1; // Move the outer loop index back to the last processed line
+				break;
+			}
+		}
 
+		// Set the question only if there are answers
+		if (!question.getAnswers().isEmpty()) {
+			questions.add(question);
+		}
+		return i;
+	}
 
+	private void addLinesToList(List<String[]> lines, CSVReader reader) throws IOException, CsvValidationException {
+		String[] nextLine;
+		while ((nextLine = reader.readNext()) != null) {
+			lines.add(nextLine);
+		}
+	}
 
+	private void setQuizNameAndLanguage(Quiz quiz, List<String[]> lines) {
+		if (!lines.isEmpty()) {
+			quiz.setName(lines.get(0)[0]);
+			quiz.setLanguageString(lines.get(0)[1]);
+		}
+	}
+
+	private void setAnswer(List<String[]> lines, Question question, int j) {
+		Answer answer = new Answer();
+		answer.setAnswer(lines.get(j)[1]);
+		answer.setCorrect(lines.get(j).length > 2 && "y".equalsIgnoreCase(lines.get(j)[2].trim()));
+		question.addAnswer(answer);
+	}
 
 	public void downloadFile(String url, String fileName) {
 		RestTemplate restTemplate = new RestTemplate();
