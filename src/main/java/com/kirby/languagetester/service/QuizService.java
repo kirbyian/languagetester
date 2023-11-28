@@ -167,7 +167,7 @@ public class QuizService {
 		Optional<Language> langaugeObject = languageRepository.findBycode(language);
 		List<Quiz> quizzes = new ArrayList<>();
 		if (langaugeObject.isPresent()) {
-			quizzes = quizRepository.findByLanguageAndQuizTypeNot(langaugeObject.get(), QuizConstants.CONJUGATION);
+			quizzes = quizRepository.findByLanguageAndQuizTypeNotOrderByName(langaugeObject.get(), QuizConstants.CONJUGATION);
 		}
 		return quizzes;
 	}

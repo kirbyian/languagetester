@@ -18,7 +18,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Long> {
 	List<Quiz> findByOwner(String owner);
 
 	@CacheEvict("quizzesByLanguageAndQuizType")
-	List<Quiz> findByLanguageAndQuizTypeNot(Language language, String quizType);
+	List<Quiz> findByLanguageAndQuizTypeNotOrderByName(Language language, String quizType);
 
 	List<Quiz> findByName(String name);
 }
