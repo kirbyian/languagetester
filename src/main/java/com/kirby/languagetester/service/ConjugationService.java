@@ -202,7 +202,7 @@ public class ConjugationService {
 		Optional<Language> langaugeObject = languageRepository.findBycode(language);
 		List<Verb> verbs = new ArrayList<Verb>();
 		if (langaugeObject.isPresent()) {
-			verbs = verbRepository.findByLanguage(langaugeObject.get());
+			verbs = verbRepository.findByLanguageOrderByVerb(langaugeObject.get());
 		}
 
 		List<Verb> filteredList = verbs.stream().filter(verb -> !verb.getTenses().isEmpty())

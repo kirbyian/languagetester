@@ -35,9 +35,9 @@ public class VerbController  {
 	public List<Verb> getAllVerbs(@RequestParam String language) {
 
 		Optional<Language> langaugeObject = languageRepository.findBycode(language);
-		List<Verb> verbs = new ArrayList<Verb>();
+		List<Verb> verbs = new ArrayList<>();
 		if (langaugeObject.isPresent()) {
-			verbs = verbRepository.findByLanguage(langaugeObject.get());
+			verbs = verbRepository.findByLanguageOrderByVerb(langaugeObject.get());
 		}
 
 		return verbs;
@@ -47,7 +47,7 @@ public class VerbController  {
 	@GetMapping("/{verbName}")
 	public Verb getVerbByName(@PathVariable String verbName) {
 
-		Optional<Verb> verb = verbRepository.findByVerbIgnoreCase(verbName);
+		Optional<Verb> verb = verbRepository.findByVerbIgnoreCaseOrderByVerb(verbName);
 
 		if (verb.isPresent()) {
 			return verb.get();
@@ -60,7 +60,7 @@ public class VerbController  {
 	@GetMapping("/exists/{verb}")
 	public boolean doesVerbExist(@PathVariable String verb) {
 
-		return verbRepository.findByVerbIgnoreCase(verb).isPresent();
+		return verbRepository.findByVerbIgnoreCaseOrderByVerb(verb).isPresent();
 
 	}
 
