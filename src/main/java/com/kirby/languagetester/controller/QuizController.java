@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kirby.languagetester.controller.dto.QuizDTO;
 import com.kirby.languagetester.model.Quiz;
 import com.kirby.languagetester.service.QuizService;
 
@@ -60,7 +61,7 @@ public class QuizController {
 	@GetMapping("/all")
 	@CacheEvict("quizzes")
 	//@Scheduled(fixedRateString = "${caching.spring.generalTTL}")
-	public List<Quiz> getAllQuizzes(@RequestParam String language) {
+	public List<QuizDTO> getAllQuizzes(@RequestParam String language) {
 
 		return quizService.findNonConjugationTypeQuizzes(language);
 

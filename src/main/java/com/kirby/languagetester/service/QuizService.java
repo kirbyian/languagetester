@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.kirby.languagetester.constants.OktaConstants;
 import com.kirby.languagetester.constants.QuizConstants;
+import com.kirby.languagetester.controller.dto.QuizDTO;
 import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.Question;
 import com.kirby.languagetester.model.Quiz;
@@ -163,8 +164,16 @@ public class QuizService {
 		return quizRepository.findByQuizTypeIgnoreCase(quizType.toUpperCase());
 	}
 
-	public List<Quiz> findNonConjugationTypeQuizzes(String language) {
-		return quizRepository.findByLanguageAndQuizTypeNotOrderByName(language, QuizConstants.CONJUGATION);
+	public List<QuizDTO> findNonConjugationTypeQuizzes(String language) {
+		List<QuizDTO> quizDTOs=new ArrayList<>();
+		List<Quiz> quizzes = quizRepository.findByLanguageAndQuizTypeNotOrderByName(language, QuizConstants.CONJUGATION);
+		for(Quiz quiz:quizzes) {
+			QuizDTO quizDTO=new QuizDTO();
+			quizDTO.setId(quiz.getId());
+			quizDTO.setName(quiz.getName());
+			quizDTOs.add(quizDTO);
+		}
+		return quizDTOs;
 	}
 
 }
