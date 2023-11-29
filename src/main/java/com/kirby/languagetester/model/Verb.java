@@ -13,7 +13,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "verbs")
+@Table(name = "Verbs")
 public class Verb extends BaseEntity {
 
 	@Column(name = "verb")
