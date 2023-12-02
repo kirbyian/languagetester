@@ -6,12 +6,16 @@ import java.util.Optional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kirby.languagetester.dto.VerbLanguageDTO;
+import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.Verb;
+import com.kirby.languagetester.repository.LanguageRepository;
 import com.kirby.languagetester.repository.VerbRepository;
 
 @RestController
@@ -20,8 +24,11 @@ public class VerbController {
 
 	private VerbRepository verbRepository;
 
-	public VerbController(VerbRepository verbRepository) {
+	private LanguageRepository languageRepository;
+
+	public VerbController(VerbRepository verbRepository, LanguageRepository languageRepository) {
 		this.verbRepository = verbRepository;
+		this.languageRepository = languageRepository;
 	}
 
 	@GetMapping()
@@ -50,12 +57,19 @@ public class VerbController {
 
 	}
 
-	@PostMapping("/{verb}")
-	public Verb createVerb(@RequestHeader(value = "Authorization") String token, @PathVariable String verb) {
+	@PostMapping()
+	public Verb createVerb(@RequestHeader(value = "Authorization") String token, @RequestBody VerbLanguageDTO verbDTO) {
 
-		Verb verbObject = new Verb();
-		verbObject.setVerb(verb);
-		return verbRepository.save(verbObject);
+		Verb verb = new Verb();
+		verb.setVerb(verbDTO.getVerb());
+		Optional<Language> optional = languageRepository.findBycode(verbDTO.getLanguage());
+
+		if (optional.isPresent()) {
+			verb.setLanguage(optional.get());
+			verb = verbRepository.save(verb);
+		}
+
+		return verb;
 
 	}
 

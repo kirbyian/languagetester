@@ -13,11 +13,16 @@ public interface VerbRepository extends JpaRepository<Verb, Long> {
 
 	public static final String VERBS_BY_LANGUAGE_WITH_TENSES = "SELECT DISTINCT v from Verb v JOIN v.tenses JOIN v.language l where l.code =?1 order by v.verb ";
 
+	public static final String VERBS_BY_LANGUAGE_CODE = "SELECT DISTINCT v from Verb v JOIN v.language l where l.code =?1 order by v.verb ";
+	
 	Optional<Verb> findByVerbContainingIgnoreCaseOrderByVerb(String verb);
 
 	Optional<Verb> findByVerbIgnoreCaseOrderByVerb(String verb);
 
 	@CacheEvict("VerbsByLanguage")
 	@Query(VERBS_BY_LANGUAGE_WITH_TENSES)
+	List<Verb> findByLanguageWithTensesOrderByVerb(String language);
+	
+	@Query(VERBS_BY_LANGUAGE_CODE)
 	List<Verb> findByLanguageOrderByVerb(String language);
 }

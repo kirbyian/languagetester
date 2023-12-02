@@ -3,8 +3,6 @@ package com.kirby.languagetester.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -16,13 +14,11 @@ import com.kirby.languagetester.conjugation.ConjugationCreationException;
 import com.kirby.languagetester.constants.ConjugationConstants;
 import com.kirby.languagetester.constants.OktaConstants;
 import com.kirby.languagetester.model.Conjugation;
-import com.kirby.languagetester.model.Language;
 import com.kirby.languagetester.model.Quiz;
 import com.kirby.languagetester.model.QuizTypes;
 import com.kirby.languagetester.model.Tense;
 import com.kirby.languagetester.model.Verb;
 import com.kirby.languagetester.repository.ConjugationRepository;
-import com.kirby.languagetester.repository.LanguageRepository;
 import com.kirby.languagetester.repository.QuizRepository;
 import com.kirby.languagetester.repository.SubjectRepository;
 import com.kirby.languagetester.repository.TenseRepository;
@@ -43,20 +39,17 @@ public class ConjugationService {
 
 	private QuizRepository quizRepository;
 
-	private LanguageRepository languageRepository;
-
 	private ExtractJWT extractJWT;
 
 	public ConjugationService(ConjugationRepository conjugationRepository, VerbRepository verbRepository,
 			TenseRepository tenseRepository, SubjectRepository subjectRepository, QuizRepository quizRepository,
-			ExtractJWT extractJWT, LanguageRepository languageRepository) {
+			ExtractJWT extractJWT) {
 		this.conjugationRepository = conjugationRepository;
 		this.verbRepository = verbRepository;
 		this.tenseRepository = tenseRepository;
 		this.subjectRepository = subjectRepository;
 		this.quizRepository = quizRepository;
 		this.extractJWT = extractJWT;
-		this.languageRepository = languageRepository;
 	}
 
 	@Transactional
@@ -73,7 +66,7 @@ public class ConjugationService {
 
 		Quiz quiz = saveQuizForTenseAndVerbConjugation(tense, verb);
 
-		List<Conjugation> conjugations = new ArrayList<Conjugation>();
+		List<Conjugation> conjugations = new ArrayList<>();
 
 		for (Long key : subjectConjugationMap.keySet()) {
 			Conjugation conjugation = mapConjugationDetails(subjectConjugationMap, tense, verb, quiz, key);
@@ -142,7 +135,7 @@ public class ConjugationService {
 
 	private void validateConjugationCreation(String verbID, String tenseID) {
 		// validate ids are numeric
-		if (verbID.isEmpty() || !StringUtils.isNumeric(verbID) || verbID.isEmpty() || !StringUtils.isNumeric(tenseID)) {
+		if (verbID.isEmpty() || !StringUtils.isNumeric(verbID) || !StringUtils.isNumeric(tenseID)) {
 			throw new ConjugationCreationException(buildMessage(verbID, tenseID, "Values provided are not valid"));
 		}
 
@@ -192,14 +185,12 @@ public class ConjugationService {
 
 	public List<Verb> findAllVerbsWithConjugations() {
 
-		List<Verb> verbs = verbRepository.findAll();
+		return verbRepository.findAll();
 
-		return verbs.stream().filter(verb -> !verb.getTenses().isEmpty())
-				.collect(Collectors.toList());
 	}
 
 	public List<Verb> getVerbAndTensesByLanguage(String language) {
-			return verbRepository.findByLanguageOrderByVerb(language);
+		return verbRepository.findByLanguageWithTensesOrderByVerb(language);
 
 	}
 
