@@ -188,9 +188,15 @@ public class ConjugationService {
 		return verbRepository.findAll();
 
 	}
-
+	
 	public List<Verb> getVerbAndTensesByLanguage(String language) {
 		return verbRepository.findByLanguageWithTensesOrderByVerb(language);
+
+	}
+
+
+	public List<Verb> getVerbAndTensesByLanguageSearch(String language, String text) {
+		return verbRepository.findByLanguageWithTensesOrderByVerbWithSearch(language,text);
 
 	}
 
