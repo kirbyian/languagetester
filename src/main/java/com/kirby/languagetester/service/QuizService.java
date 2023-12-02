@@ -175,5 +175,17 @@ public class QuizService {
 		}
 		return quizDTOs;
 	}
+	
+	public List<QuizDTO> findNonConjugationTypeQuizzesBySearch(String language,String textSearch) {
+		List<QuizDTO> quizDTOs=new ArrayList<>();
+		List<Quiz> quizzes = quizRepository.findByLanguageAndQuizTypeNotOrderByNameBySearch(language, QuizConstants.CONJUGATION,textSearch);
+		for(Quiz quiz:quizzes) {
+			QuizDTO quizDTO=new QuizDTO();
+			quizDTO.setId(quiz.getId());
+			quizDTO.setName(quiz.getName());
+			quizDTOs.add(quizDTO);
+		}
+		return quizDTOs;
+	}
 
 }
