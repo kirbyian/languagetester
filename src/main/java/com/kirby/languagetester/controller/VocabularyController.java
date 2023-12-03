@@ -60,9 +60,23 @@ public class VocabularyController {
 		if (optionalLanguage.isPresent()) {
 			languageCategoryDTO.setLanguage(optionalLanguage.get().getName());
 			distinctCategoriesByLanguage = vocabItemRepository
-					.findAllDistinctCategories(optionalLanguage.get().getId());
+					.findAllDistinctCategoriesByLanguage(optionalLanguage.get().getId());
 			languageCategoryDTO.setCategories(distinctCategoriesByLanguage);
 		}
+
+		return new ResponseEntity(languageCategoryDTO, HttpStatus.OK);
+
+	}
+	
+	@GetMapping("/categories/search")
+	public ResponseEntity<LanguageCategoryDto> getCategoriesByLanguage(@RequestParam String language,@RequestParam String searchText) {
+
+
+		LanguageCategoryDto languageCategoryDTO = new LanguageCategoryDto();
+
+			List<String> distinctCategoriesByLanguage = vocabItemRepository
+					.findAllDistinctCategoriesByLanguageAndSearchText(language,searchText);
+			languageCategoryDTO.setCategories(distinctCategoriesByLanguage);
 
 		return new ResponseEntity(languageCategoryDTO, HttpStatus.OK);
 
