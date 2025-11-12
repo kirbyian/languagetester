@@ -11,12 +11,8 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -27,8 +23,6 @@ import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
 import com.amazonaws.services.s3.model.PutObjectResult;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kirby.languagetester.model.Language;
@@ -40,149 +34,139 @@ import com.kirby.languagetester.service.S3Service;
 @Service
 public class AudioDownloader {
 
-	private String speechGenURL = "https://speechgen.io/index.php?r=api/text";
+    @Value("${speechgen.api.url:https://speechgen.io/index.php?r=api/text}")
+    private String speechGenURL;
 
-	private String awsBaseURL = "https://kirbylanguageapp.s3.eu-west-1.amazonaws.com/";
+    @Value("${speechgen.api.token}")
+    private String speechGenToken;
 
-	private VocabItemRepository vocabItemRepository;
+    @Value("${speechgen.api.email}")
+    private String speechGenEmail;
 
-	private LanguageRepository languageRepository;
+    @Value("${aws.s3.audio.base-url}")
+    private String awsBaseURL;
 
-	private S3Service s3Service;
+    private final VocabItemRepository vocabItemRepository;
+    private final LanguageRepository languageRepository;
+    private final S3Service s3Service;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
-	public AudioDownloader(VocabItemRepository vocabItemRepository, LanguageRepository languageRepository,
-			S3Service s3Service) {
-		this.vocabItemRepository = vocabItemRepository;
-		this.languageRepository = languageRepository;
-		this.s3Service = s3Service;
-	}
+    public AudioDownloader(VocabItemRepository vocabItemRepository,
+                           LanguageRepository languageRepository,
+                           S3Service s3Service) {
+        this.vocabItemRepository = vocabItemRepository;
+        this.languageRepository = languageRepository;
+        this.s3Service = s3Service;
+        this.restTemplate = new RestTemplate();
+        this.objectMapper = new ObjectMapper();
+    }
 
-	@Transactional
-	public void processVocabularyItems(Path path) throws Exception {
+    @Transactional
+    public void processVocabularyItems(Path path) throws Exception {
+        List<VocabularyItem> vocabularyItems = parseFile(path);
 
-		// check if word exists for vocabulary item by word and language
-		List<VocabularyItem> vocabularyItems = parseFileinCurrentDirectory(path);
+        for (VocabularyItem vocabularyItem : vocabularyItems) {
 
-		for (VocabularyItem vocabularyItem : vocabularyItems) {
+            validateItem(vocabularyItem);
 
-			validateItem(vocabularyItem);
-			Optional<VocabularyItem> foundVocabItem = vocabItemRepository
-					.findByLanguageAndWord(vocabularyItem.getLanguage(), vocabularyItem.getWord());
-			String vocabularyItemPath = "audio/" + vocabularyItem.getLanguage().getName().toLowerCase() + "/"
-					+ vocabularyItem.getCategory() + "/" + vocabularyItem.getWord().trim()+".mp3";
+            Optional<VocabularyItem> existingItem =
+                    vocabItemRepository.findByLanguageAndWord(
+                            vocabularyItem.getLanguage(),
+                            vocabularyItem.getWord());
 
-			if (foundVocabItem.isPresent()) {
-				vocabularyItem = foundVocabItem.get();
-			}
+            String vocabPath = String.format("audio/%s/%s/%s.mp3",
+                    vocabularyItem.getLanguage().getName().toLowerCase(),
+                    vocabularyItem.getCategory(),
+                    vocabularyItem.getWord().trim());
 
-			boolean exists = s3Service.getAWSFileURL(vocabularyItemPath);
-			if (!exists) {
-				String fileToUpload = postToTextToSpeech(vocabularyItem);
-				PutObjectResult uploadedFile = s3Service.uploadFile(fileToUpload, vocabularyItemPath);
-				if (uploadedFile != null) {
-					vocabularyItem.setAudioUrl(awsBaseURL + vocabularyItemPath);
-				}
+            if (existingItem.isPresent()) {
+                vocabularyItem = existingItem.get();
+            }
 
-			}else {
-				vocabularyItem.setAudioUrl(awsBaseURL+vocabularyItemPath);
-			}
-			// upload to AWS
+            boolean exists = s3Service.getAWSFileURL(vocabPath);
+            if (!exists) {
+                String localFile = postToTextToSpeech(vocabularyItem);
+                PutObjectResult result = s3Service.uploadFile(localFile, vocabPath);
+                if (result != null) {
+                    vocabularyItem.setAudioUrl(awsBaseURL + vocabPath);
+                }
+            } else {
+                vocabularyItem.setAudioUrl(awsBaseURL + vocabPath);
+            }
 
-			vocabularyItem = vocabItemRepository.save(vocabularyItem);
+            vocabItemRepository.save(vocabularyItem);
+        }
+    }
 
-		}
-	}
+    private void validateItem(VocabularyItem vocabularyItem) throws Exception {
+        // TODO: add validation logic (non-null fields, supported language codes, etc.)
+    }
 
-	private void validateItem(VocabularyItem vocabularyItem) throws Exception {
+    public List<VocabularyItem> parseFile(Path file) {
+        List<VocabularyItem> vocabularyItems = new ArrayList<>();
+        try {
+            if (file.getFileName().toString().endsWith(".csv")) {
+                List<String> lines = Files.lines(file).collect(Collectors.toList());
+                for (String line : lines) {
+                    String[] values = line.split(",");
+                    if (values.length < 4) continue;
 
-	}
+                    VocabularyItem item = new VocabularyItem();
+                    item.setWord(values[0]);
+                    item.setTranslation(values[1]);
+                    item.setCategory(values[2]);
+                    languageRepository.findBycode(values[3])
+                            .ifPresent(item::setLanguage);
+                    vocabularyItems.add(item);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return vocabularyItems;
+    }
 
-	public List<VocabularyItem> parseFileinCurrentDirectory(Path file) {
+    public String postToTextToSpeech(VocabularyItem vocab) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-		List<VocabularyItem> vocabularyItems = new ArrayList<>();
-		try {
-			if (file.getFileName().toString().endsWith(".csv")) {
-				System.out.println("Reading file: " + file);
-				List<String> lines;
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("token", speechGenToken);
+        form.add("email", speechGenEmail);
 
-				lines = Files.lines(file).collect(Collectors.toList());
+        String voice = switch (vocab.getLanguage().getCode()) {
+            case "pt" -> "Yara";
+            case "fr" -> "Lea";
+            default -> "Brian";
+        };
 
-				for (String line : lines) {
+        form.add("voice", voice);
+        form.add("text", vocab.getWord());
+        form.add("format", "mp3");
 
-					String[] lineValues = line.split(",");
-					VocabularyItem item = new VocabularyItem();
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(form, headers);
+        ResponseEntity<String> response = restTemplate.postForEntity(speechGenURL, request, String.class);
 
-					item.setWord(lineValues[0]);
-					item.setTranslation(lineValues[1]);
-					item.setCategory(lineValues[2]);
-					Optional<Language> languageObject = languageRepository.findBycode(lineValues[3]);
-					item.setLanguage(languageObject.get());
-					vocabularyItems.add(item);
-				}
+        if (response.getStatusCode() == HttpStatus.OK) {
+            JsonNode root = objectMapper.readTree(response.getBody());
+            String fileURL = root.get("file").asText();
+            String localPath = "./audio/" + vocab.getWord().trim() + ".mp3";
+            downloadFile(fileURL, localPath);
+            return localPath;
+        }
 
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return vocabularyItems;
-	}
+        throw new IOException("Failed to generate speech for: " + vocab.getWord());
+    }
 
-	public String postToTextToSpeech(VocabularyItem vocabularyItem) throws JsonMappingException, JsonProcessingException {
-		RestTemplate restTemplate = new RestTemplate();
-
-		// Create headers
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-		String audioFilePath = "";
-
-		// Create parameters
-		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-		map.add("token", "f3d42938737ceab9ebd801cbc20ce532");
-		map.add("email", "iankirby1991@hotmail.com");
-		if(vocabularyItem.getLanguage().getCode().equals("pt")){
-			map.add("voice", "Yara");
-		}else if(vocabularyItem.getLanguage().getCode().equals("fr")) {
-			map.add("voice", "Lea");
-		}
-		
-		map.add("text", vocabularyItem.getWord());
-		map.add("format", "mp3");
-
-		// Build the request
-		// Send the request as POST
-		HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
-
-		ResponseEntity<String> response = restTemplate.postForEntity(speechGenURL, request, String.class);
-		if (response.getStatusCode() == HttpStatus.OK) {
-
-			String responseBody = response.getBody();
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode rootNode = mapper.readTree(responseBody);
-
-			// Assuming the response body is a JSON object...
-			String speechGenFileURL = rootNode.get("file").asText();
-			audioFilePath = "./audio" + vocabularyItem.getWord().trim() + ".mp3";
-
-			downloadFile(speechGenFileURL, audioFilePath);
-		}
-		return audioFilePath;
-	}
-
-	public void downloadFile(String url, String fileName) {
-		RestTemplate restTemplate = new RestTemplate();
-
-		RequestCallback requestCallback = restTemplate.httpEntityCallback(null, null);
-
-		ResponseExtractor<Void> responseExtractor = new ResponseExtractor<Void>() {
-			@Override
-			public Void extractData(ClientHttpResponse response) throws IOException {
-				FileOutputStream fileOutputStream = new FileOutputStream(fileName); // Output file path
-				StreamUtils.copy(response.getBody(), fileOutputStream);
-				fileOutputStream.close();
-				return null;
-			}
-		};
-		restTemplate.execute(url, HttpMethod.GET, requestCallback, responseExtractor);
-	}
-
+    private void downloadFile(String url, String fileName) throws IOException {
+        RequestCallback requestCallback = restTemplate.httpEntityCallback(null, null);
+        ResponseExtractor<Void> responseExtractor = (ClientHttpResponse response) -> {
+            try (FileOutputStream out = new FileOutputStream(fileName)) {
+                StreamUtils.copy(response.getBody(), out);
+            }
+            return null;
+        };
+        restTemplate.execute(url, HttpMethod.GET, requestCallback, responseExtractor);
+    }
 }
